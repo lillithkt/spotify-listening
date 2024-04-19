@@ -10,6 +10,8 @@
 			['user-read-currently-playing'],
 			'/auth/accept'
 		);
-		console.log(res);
+		if (res) {
+			window.location.pathname = '/';
+		}
 	});
 </script>
