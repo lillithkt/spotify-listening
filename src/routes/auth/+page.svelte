@@ -4,14 +4,26 @@
 	import { PUBLIC_CLIENT_ID, PUBLIC_REDIRECT_URI } from '$env/static/public';
 
 	onMount(async () => {
-		const res = await SpotifyApi.performUserAuthorization(
+		await SpotifyApi.performUserAuthorization(
 			PUBLIC_CLIENT_ID,
 			PUBLIC_REDIRECT_URI,
 			['user-read-currently-playing'],
-			'/auth/accept'
+			async (token) => {
+				const res = await fetch('/auth/accept', {
+					method: 'POST',
+					headers: {
+						'Content-Type': 'application/json'
+					},
+					body: JSON.stringify(token)
+				});
+				if (res.status === 200) {
+					window.location.pathname = '/';
+				} else {
+					const error = await res.json();
+					console.error(error);
+					alert(`Failed to authenticate: ${error.message}`);
+				}
+			}
 		);
-		if (res) {
-			window.location.pathname = '/';
-		}
 	});
 </script>

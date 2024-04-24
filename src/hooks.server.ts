@@ -1,7 +1,7 @@
 import { USERNAME } from '$env/static/private';
 import type { SpotifyApi } from '@spotify/web-api-ts-sdk';
 import type { Handle } from '@sveltejs/kit';
-import type { PlaybackState } from '$lib/types/PlaybackState';
+import type { NotPlayingPlaybackState, PlaybackState } from '$lib/types/PlaybackState';
 
 let sdk: SpotifyApi | undefined = undefined;
 let nowPlaying: PlaybackState | undefined = undefined;
@@ -11,12 +11,17 @@ function setSdk(newSdk: SpotifyApi) {
 	sdk = newSdk;
 }
 
-async function getPlaybackState(): Promise<PlaybackState> {
+async function getPlaybackState(): Promise<PlaybackState | NotPlayingPlaybackState> {
 	const now = Date.now();
 	if (nowPlaying && now - lastFetch < 5000) {
 		return nowPlaying;
 	}
 	const np = await sdk?.player.getCurrentlyPlayingTrack();
+	if (!np)
+		return {
+			item: null,
+			is_playing: false
+		} as NotPlayingPlaybackState;
 	nowPlaying = JSON.parse(JSON.stringify(np).replace(new RegExp(USERNAME, 'g'), '<redacted>'));
 	lastFetch = now;
 	if (nowPlaying && nowPlaying.item && nowPlaying.is_playing) {
