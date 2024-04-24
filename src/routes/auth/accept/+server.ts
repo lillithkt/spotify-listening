@@ -1,11 +1,14 @@
-import sdk, { sdkWithToken } from '$lib/server/spotify/index';
-import type { AccessToken } from '@spotify/web-api-ts-sdk';
+import { USERNAME } from '$env/static/private';
+import { PUBLIC_CLIENT_ID } from '$env/static/public';
+import { SpotifyApi, type AccessToken } from '@spotify/web-api-ts-sdk';
 import { error, text, type RequestHandler } from '@sveltejs/kit';
 
-export const POST: RequestHandler = async ({ request }) => {
-	console.log(sdk.sdk);
-	if (sdk.sdk) return error(400, 'Already authenticated');
+export const POST: RequestHandler = async ({ request, locals }) => {
+	if (locals.sdk) return error(400, 'Already authenticated');
 	const token: AccessToken = await request.json();
-	sdkWithToken(token);
+	const newSdk = SpotifyApi.withAccessToken(PUBLIC_CLIENT_ID, token);
+	const profile = await newSdk.currentUser.profile();
+	if (profile.id !== USERNAME) return error(400, 'Invalid user');
+	locals.setSdk(newSdk);
 	return text('Authenticated');
 };
