@@ -1,7 +1,7 @@
 import { USERNAME } from '$env/static/private';
+import type { NotPlayingPlaybackState, PlaybackState } from '$lib/types/PlaybackState';
 import type { SpotifyApi } from '@spotify/web-api-ts-sdk';
 import type { Handle } from '@sveltejs/kit';
-import type { NotPlayingPlaybackState, PlaybackState } from '$lib/types/PlaybackState';
 
 let sdk: SpotifyApi | undefined = undefined;
 let nowPlaying: PlaybackState | undefined = undefined;
@@ -47,5 +47,8 @@ export const handle: Handle = async ({ event, resolve }) => {
 	};
 
 	const response = await resolve(event);
+	response.headers.append('Access-Control-Allow-Origin', '*');
+	response.headers.append('Access-Control-Allow-Methods', 'GET, OPTIONS');
+	response.headers.append('Access-Control-Allow-Headers', 'Content-Type');
 	return response;
 };
