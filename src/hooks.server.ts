@@ -14,6 +14,7 @@ function setSdk(newSdk: SpotifyApi) {
 async function getPlaybackState(): Promise<PlaybackState | NotPlayingPlaybackState> {
 	const now = Date.now();
 	if (nowPlaying && now - lastFetch < 5000) {
+		nowPlaying.progress_ms += now - lastFetch;
 		return nowPlaying;
 	}
 	const np = await sdk?.player.getCurrentlyPlayingTrack();
@@ -23,6 +24,7 @@ async function getPlaybackState(): Promise<PlaybackState | NotPlayingPlaybackSta
 			is_playing: false
 		} as NotPlayingPlaybackState;
 	nowPlaying = JSON.parse(JSON.stringify(np).replace(new RegExp(USERNAME, 'g'), '<redacted>'));
+	// Make up for the cache time
 	lastFetch = now;
 	if (nowPlaying && nowPlaying.item && nowPlaying.is_playing) {
 		const timeLeft = nowPlaying.item.duration_ms - nowPlaying.progress_ms;
