@@ -17,13 +17,12 @@ async function getPlaybackState(): Promise<PlaybackState | NotPlayingPlaybackSta
 		nowPlaying.progress_ms += now - lastFetch;
 		return nowPlaying;
 	}
-	const np = await sdk?.player.getCurrentlyPlayingTrack();
-	if (!np)
+	const nowPlaying = await sdk?.player.getCurrentlyPlayingTrack();
+	if (!nowPlaying)
 		return {
 			item: null,
 			is_playing: false
 		} as NotPlayingPlaybackState;
-	nowPlaying = JSON.parse(JSON.stringify(np).replace(new RegExp(USERNAME, 'g'), '<redacted>'));
 	// Make up for the cache time
 	lastFetch = now;
 	if (nowPlaying && nowPlaying.item && nowPlaying.is_playing) {
